@@ -4,7 +4,5 @@
 
 **Frontend**: Vue.js + Vuetify
 
----
 Запуск проекта:
-
 ```python manage.py runserver```
