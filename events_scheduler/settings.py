@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'corsheaders',
 
     'events.apps.EventsConfig',
 ]
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -58,7 +60,7 @@ ROOT_URLCONF = 'events_scheduler.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -125,4 +127,25 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
+]
+
+
+# Django Rest Framework
+
+REST_FRAMEWORK = {
+    'DATETIME_FORMAT': r'%Y-%m-%d %H:%M',
+    'DATETIME_INPUT_FORMATS': r'%Y-%m-%d %H:%M',
+}
+
+
+# Django-cors-headers
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+]
+
+CORS_URLS_REGEX = r'^/api/'
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8080",
 ]

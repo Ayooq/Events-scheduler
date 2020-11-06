@@ -6,11 +6,11 @@ class Event(models.Model):
     """Модель мероприятия."""
 
     name = models.CharField('название', max_length=255)
-    start_date = models.DateTimeField(
+    start = models.DateTimeField(
         'дата и время начала',
         default=tz.now,
     )
-    end_date = models.DateTimeField(
+    end = models.DateTimeField(
         'дата и время окончания',
         default=tz.now,
     )
