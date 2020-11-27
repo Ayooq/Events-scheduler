@@ -14,6 +14,7 @@ class Event(models.Model):
         'дата и время окончания',
         default=tz.now,
     )
+    color = models.CharField('цвет', max_length=20, default='secondary')
 
     class Meta:
         verbose_name = 'Мероприятие'

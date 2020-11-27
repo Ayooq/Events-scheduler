@@ -38,8 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'rest_framework',
     'corsheaders',
+    'rest_framework',
+    'social_django',
 
     'events.apps.EventsConfig',
 ]
@@ -85,6 +86,17 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+
+# Authentication
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.github.GithubOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_GITHUB_KEY = '335afcf7bf4fe8fa295c'
+SOCIAL_AUTH_GITHUB_SECRET = '47eb79d0a9d70ebc551357b0ab06f4ed958bfd15'
 
 
 # Password validation
@@ -133,8 +145,8 @@ STATICFILES_DIRS = [
 # Django Rest Framework
 
 REST_FRAMEWORK = {
-    'DATETIME_FORMAT': r'%Y-%m-%d %H:%M',
-    'DATETIME_INPUT_FORMATS': r'%Y-%m-%d %H:%M',
+    'DATETIME_FORMAT': '%Y-%m-%d %H:%M',
+    'DATETIME_INPUT_FORMATS': ['%Y-%m-%d %H:%M'],
 }
 
 
@@ -144,7 +156,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
 ]
 
-CORS_URLS_REGEX = r'^/api/'
+CORS_URLS_REGEX = r'^/api/.*$'
+
+CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8080",

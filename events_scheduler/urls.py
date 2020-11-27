@@ -22,5 +22,6 @@ urlpatterns = [
     path('api/v1/', include([
         path('events/', include('events.urls')),
     ])),
+    path('auth/', include('social_django.urls', namespace='social')),
     path('', TemplateView.as_view(template_name='index.html'), name='index'),
 ]
