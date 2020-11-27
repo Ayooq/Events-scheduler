@@ -1,8 +1,8 @@
 import Vue from "vue";
 import Vuex from "vuex";
 
-import api from "../../../backup/events_scheduler/src/store/modules/api";
-import event from "../../../backup/events_scheduler/src/store/modules/event";
+import api from "./modules/api";
+import event from "./modules/event";
 
 Vue.use(Vuex);
 
@@ -12,7 +12,7 @@ const state = () => ({
 
 const mutations = {
   addEvents(state, events) {
-    events.forEach(e => state.events.push(e));
+    events.forEach((e) => state.events.push(e));
   },
   updateEvents(state, events) {
     const updateEvent = state.events.splice;
@@ -22,7 +22,7 @@ const mutations = {
   },
   deleteEvents(state, eventsIndeces) {
     const deleteEvent = state.events.splice;
-    eventsIndeces.forEach(index => {
+    eventsIndeces.forEach((index) => {
       deleteEvent(index, 1);
     });
   },

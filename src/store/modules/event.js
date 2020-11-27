@@ -5,7 +5,7 @@ const state = {
     new: false,
     existing: false,
   },
-  color: 'secondary',
+  color: "secondary",
   name: null,
   dateRange: [],
   time: {
@@ -48,40 +48,40 @@ const mutations = {
 const actions = {
   showEvent({ state, commit }, type) {
     if (state.isValid) {
-      commit('invalidateEvent', false);
+      commit("invalidateEvent", false);
     }
     setTimeout(() => {
-      commit('changeEventVisibility', { type, value: true });
+      commit("changeEventVisibility", { type, value: true });
     }, 10);
   },
   dismissEvent({ commit }, type) {
-    commit('changeEventVisibility', { type, value: false });
+    commit("changeEventVisibility", { type, value: false });
   },
 
   async setEventData({ commit, dispatch }, event) {
-    commit('setEventID', event.id);
-    return dispatch('setEventCardData', event);
+    commit("setEventID", event.id);
+    return dispatch("setEventCardData", event);
   },
   async setEventCardData({ commit }, event) {
-    commit('setEventColor', event.color);
-    commit('setEventName', event.name);
-    commit('setEventDateRange', event.dateRange);
-    commit('setEventTimeStart', event.time.start);
-    commit('setEventTimeEnd', event.time.end);
+    commit("setEventColor", event.color);
+    commit("setEventName", event.name);
+    commit("setEventDateRange", event.dateRange);
+    commit("setEventTimeStart", event.time.start);
+    commit("setEventTimeEnd", event.time.end);
     return event;
   },
 
   updateEvent({ dispatch, commit }, event) {
-    const index = dispatch('findEventIndex', event.id, { root: true });
+    const index = dispatch("findEventIndex", event.id, { root: true });
     const payload = {
       index,
       data: event,
     };
-    commit('updateEvents', [payload], { root: true });
+    commit("updateEvents", [payload], { root: true });
   },
   deleteEvent({ dispatch, commit }, eventId) {
-    const eventIndex = dispatch('findEventIndex', eventId, { root: true });
-    commit('deleteEvents', [eventIndex], { root: true });
+    const eventIndex = dispatch("findEventIndex", eventId, { root: true });
+    commit("deleteEvents", [eventIndex], { root: true });
   },
 };
 

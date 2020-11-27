@@ -1,11 +1,8 @@
 <template>
-  <div class="home">
-    <Scheduler />
-  </div>
+  <Scheduler />
 </template>
 
 <script>
-  // @ is an alias to /src
   import Scheduler from "@/components/Scheduler.vue";
 
   export default {
