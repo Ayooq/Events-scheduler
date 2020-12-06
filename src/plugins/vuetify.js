@@ -5,6 +5,9 @@ import ru from "vuetify/es5/locale/ru";
 Vue.use(Vuetify);
 
 export default new Vuetify({
+  icons: {
+    iconfont: "mdiSvg",
+  },
   lang: {
     locales: { ru },
     current: "ru",

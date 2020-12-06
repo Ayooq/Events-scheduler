@@ -1,15 +1,15 @@
 <template>
   <v-card>
-    <v-card-title v-if="isNew">
+    <v-card-title v-if="id">
       <span v-once class="headline">Запланировать мероприятие</span>
     </v-card-title>
 
-    <v-toolbar v-else dark :color="color">
+    <v-toolbar v-else dark :color="form.color">
       <v-toolbar-title v-once>{{ name }}</v-toolbar-title>
 
       <v-spacer />
 
-      <v-dialog v-model="deleteDialog" width="350px">
+      <v-dialog v-model="confirmDelete" width="350">
         <template #activator="{ on, attrs }">
           <v-btn icon v-bind="attrs" v-on="on">
             <v-icon v-once>mdi-delete</v-icon>
@@ -17,9 +17,9 @@
         </template>
 
         <v-card>
-          <v-card-title v-once class="error white--text"
-            >Удалить мероприятие?</v-card-title
-          >
+          <v-card-title v-once class="error white--text">
+            Удалить мероприятие?
+          </v-card-title>
 
           <v-divider />
 
@@ -30,12 +30,12 @@
               color="error"
               text
               :loading="pending.delete"
-              @click="deleteRequest"
+              @click="deleteEvent"
             >
               <v-icon v-once left>mdi-delete-forever-outline</v-icon>
               <span v-once>Да</span>
             </v-btn>
-            <v-btn color="info" text @click="deleteDialog = false">
+            <v-btn color="info" text @click="confirmDelete = false">
               <v-icon v-once left>mdi-delete-restore</v-icon>
               <span v-once>Нет</span>
             </v-btn>
@@ -48,11 +48,11 @@
       <v-container>
         <ErrorAlertsList :alerts="alerts" />
 
-        <v-form v-model="formIsValid">
+        <v-form v-model="form.isValid">
           <v-row justify="space-around">
             <v-col cols="12" sm="11">
               <v-text-field
-                v-model.lazy.trim="name"
+                v-model.lazy.trim="form.name"
                 label="Название"
                 prepend-icon="mdi-rename-box"
                 clearable
@@ -63,21 +63,21 @@
             </v-col>
             <v-col
               v-for="(picker, type, index) in pickers"
-              cols="12"
               :key="index"
+              cols="12"
               :sm="picker.colSizeSm"
             >
               <v-menu
                 :ref="type"
                 v-model="picker.show"
-                min-width="290px"
+                min-width="290"
                 nudge-right="15"
                 origin="bottom left"
                 transition="scale-transition"
                 offset-y
                 top
                 :close-on-content-click="false"
-                :return-value.sync="[type]"
+                :return-value.sync="form[type]"
               >
                 <template #activator="{ on, attrs }">
                   <v-text-field
@@ -88,19 +88,23 @@
                     :hint="picker.hint"
                     :label="picker.label"
                     :prepend-icon="picker.icon"
-                    :rules="rules"
+                    :rules="rules.dateRange"
                     :validate-on-blur="true"
-                    :value="dateFormatted"
+                    :value="formattedDates"
                     v-bind="attrs"
-                    @input.prevent
                     v-on="on"
                   >
                     <template #append>
-                      <v-tooltip top>
-                        <template #activator="{ on: at, attrs: bindings }">
-                          <v-icon v-bind="bindings" v-on="at"
-                            >mdi-help-circle-outline</v-icon
+                      <v-tooltip open-delay="10" top>
+                        <template
+                          #activator="{ on: listeners, attrs: tooltipAttrs }"
+                        >
+                          <v-icon
+                            v-bind="{ ...tooltipAttrs }"
+                            v-on="{ ...listeners }"
                           >
+                            mdi-help-circle-outline
+                          </v-icon>
                         </template>
                         <span v-once>
                           После выбора начальной даты Вы можете выбрать дату
@@ -111,10 +115,12 @@
                   </v-text-field>
                   <v-text-field
                     v-else
-                    v-model="[type]"
+                    v-model="form[type]"
                     readonly
                     :label="picker.label"
                     :prepend-icon="picker.icon"
+                    :rules="rules[type]"
+                    :validate-on-blur="true"
                     v-bind="attrs"
                     v-on="on"
                   />
@@ -122,7 +128,7 @@
 
                 <v-date-picker
                   v-if="type === 'dateRange'"
-                  v-model=".dateRange"
+                  v-model="form.dateRange"
                   first-day-of-week="1"
                   locale="ru"
                   locale-first-day-of-year="4"
@@ -133,17 +139,17 @@
                 >
                   <v-spacer />
 
-                  <v-btn color="info" text @click="applyPickerState(type)"
-                    >OK</v-btn
-                  >
-                  <v-btn color="error" text @click="picker.show = false"
-                    >Отмена</v-btn
-                  >
+                  <v-btn color="info" text @click="applyPickerState(type)">
+                    OK
+                  </v-btn>
+                  <v-btn color="error" text @click="picker.show = false">
+                    Отмена
+                  </v-btn>
                 </v-date-picker>
 
                 <v-time-picker
                   v-else
-                  v-model="[type]"
+                  v-model="form[type]"
                   format="24hr"
                   full-width
                   scrollable
@@ -151,12 +157,12 @@
                 >
                   <v-spacer />
 
-                  <v-btn color="info" text @click="applyPickerState(type)"
-                    >OK</v-btn
-                  >
-                  <v-btn color="error" text @click="picker.show = false"
-                    >Отмена</v-btn
-                  >
+                  <v-btn color="info" text @click="applyPickerState(type)">
+                    OK
+                  </v-btn>
+                  <v-btn color="error" text @click="picker.show = false">
+                    Отмена
+                  </v-btn>
                 </v-time-picker>
               </v-menu>
             </v-col>
@@ -169,309 +175,314 @@
       <v-spacer />
 
       <v-btn
-        color="success"
+        color="info"
         text
-        :disabled="!formIsValid"
+        :disabled="!form.isValid"
         :loading="pending.submit"
-        @click="submitRequest"
-        >Сохранить</v-btn
+        @click="submitForm"
       >
-      <v-btn color="error" text @click="cancelFormEditing">Отмена</v-btn>
+        OK
+      </v-btn>
+      <v-btn color="error" text @click="close">Отмена</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script>
-import { createNamespacedHelpers } from 'vuex';
-import ErrorAlertsList from './ErrorAlertsList.vue';
+  import ErrorAlertsList from "./ErrorAlertsList.vue";
 
-const {
-  mapState: mapEventState,
-  mapMutations: mapEventMutations,
-  mapActions: mapEventActions,
-} = createNamespacedHelpers('event');
+  export default {
+    name: "EventCard",
 
-export default {
-  name: 'EventCard',
+    components: {
+      ErrorAlertsList,
+    },
 
-  components: {
-    ErrorAlertsList,
-  },
-
-  props: {
-    isNew: {
-      type: Boolean,
-      default: false,
-    },
-    color: {
-      type: String,
-      default: 'secondary',
-    },
-    name: {
-      type: String,
-      required: true,
-    },
-    dateRange: {
-      type: Array,
-      required: true,
-    },
-    timeStart: {
-      type: String,
-      required: true,
-    },
-    timeEnd: {
-      type: String,
-      required: true,
-    },
-    rejectionCallback: {
-      type: Function,
-      required: true,
-    },
-  },
-
-  data: () => ({
-    deleteDialog: false,
-    pending: {
-      delete: false,
-      submit: false,
-    },
-    alerts: [],
-    colors: [
-      'blue',
-      'indigo',
-      'deep-purple',
-      'cyan',
-      'green',
-      'orange',
-      'red',
-      'grey darken-1',
-    ],
-    pickers: {
+    props: {
+      // Event
+      id: {
+        type: [String, Number],
+        default: null,
+      },
+      color: {
+        type: String,
+        default: "secondary",
+      },
+      name: {
+        type: String,
+        required: true,
+      },
       dateRange: {
-        colSizeSm: 11,
-        icon: 'mdi-calendar',
-        label: 'Дата',
-        hint: 'Выберите диапазон',
-        show: false,
+        type: Array,
+        required: true,
       },
       timeStart: {
-        colSizeSm: 5,
-        icon: 'mdi-clock-outline',
-        label: 'Время начала',
-        color: 'primary',
-        show: false,
+        type: String,
+        required: true,
       },
       timeEnd: {
-        colSizeSm: 5,
-        icon: 'mdi-clock',
-        label: 'Время окончания',
-        color: 'error',
-        show: false,
+        type: String,
+        required: true,
+      },
+
+      // Request callback
+      onError: {
+        type: Function,
+        required: true,
       },
     },
-    rules: [ state => state !== null && !!state.length || 'Обязательное поле' ],
-    today: new Date().toISOString().substring(0, 10),
-  }),
 
-  computed: {
-    // Vuex
-    events() {
-      return this.$store.state.events;
-    },
-    ...mapEventState({
-      eventIsValid: 'formIsValid',
-      eventColor: 'color',
-      eventName: 'name',
-      eventDateRange: 'dateRange',
-      eventTime: 'time',
+    data: () => ({
+      today: new Date().toISOString().substring(0, 10),
+      form: {
+        isValid: false,
+        color: this.color,
+        name: this.name,
+        dateRange: this.dateRange,
+        timeStart: this.timeStart,
+        timeEnd: this.timeEnd,
+      },
+      confirmDelete: false,
+      pending: {
+        delete: false,
+        submit: false,
+      },
+      alerts: [],
+      colors: [
+        "blue",
+        "indigo",
+        "deep-purple",
+        "cyan",
+        "green",
+        "orange",
+        "red",
+        "grey darken-1",
+      ],
+      pickers: {
+        dateRange: {
+          colSizeSm: 11,
+          icon: "mdi-calendar",
+          label: "Дата",
+          hint: "Выберите диапазон",
+          show: false,
+        },
+        timeStart: {
+          colSizeSm: 5,
+          icon: "mdi-clock-outline",
+          label: "Время начала",
+          color: "primary",
+          show: false,
+        },
+        timeEnd: {
+          colSizeSm: 5,
+          icon: "mdi-clock",
+          label: "Время окончания",
+          color: "error",
+          show: false,
+        },
+      },
+      rules: {
+        alerts: {
+          requiredField: "Обязательное поле",
+          todayThreshold: "Дата начала не может быть меньше текущей",
+          negativeTimeInterval: "Время установлено некорректно",
+        },
+        name: [(value) => !!value || this.rules.alerts.requiredField],
+        dateRange: [
+          (range) => range.length > 0 || this.rules.alerts.requiredField,
+          (range) => {
+            const isValid = range.every((date) => date >= this.today);
+            return isValid || this.rules.alerts.todayThreshold;
+          },
+        ],
+        timeStart: [(value) => this.validateTime(value)],
+        timeEnd: [(value) => this.validateTime(value, false)],
+      },
     }),
 
-    // Local
-    formIsValid: {
-      get() {
-        return this.eventIsValid;
+    computed: {
+      // Vuex
+      events() {
+        return this.$store.state.events;
       },
-      set(state) {
-        this.invalidateEvent(state);
+
+      // Local
+      selectedDates() {
+        return this.form.dateRange.length;
+      },
+      formattedDates() {
+        switch (this.selectedDates) {
+          case 0:
+            return [];
+          case 1:
+            return this.formatDate(this.form.dateRange[0]);
+        }
+
+        return this.form.dateRange
+          .map((date) => this.formatDate(date))
+          .join(" — ");
       },
     },
-    dateFormatted() {
-      if (this..dateRange.length) {
-        return this..dateRange.map(date => {
-          return this.formatDate(date);
-        }).join(' ~ ');
-      }
-      return [];
+
+    methods: {
+      // Vuex
+      sendData(payload) {
+        return this.$store.dispatch("api/sendData", payload);
+      },
+
+      // BACKEND
+
+      // Requests
+      async submitForm() {
+        console.log("submitting form...");
+        this.alerts = [];
+
+        if (this.id && this.hasNoChanges()) {
+          const message = "Для сохранения необходимо внести изменения.";
+          this.alerts.push({ text: { message } });
+          this.form.isValid = false;
+          return;
+        }
+
+        const callbackType = this.id ? "Put" : "Post";
+        const successCallback = `on${callbackType}Success`;
+        const method = callbackType.toUpperCase();
+        const body = this.getPayloadBody();
+        const payload = { method, body };
+
+        this.pending.submit = true;
+
+        try {
+          const response = await this.sendData(payload);
+          this[successCallback](response);
+          this.close();
+        } catch (error) {
+          this.onError(error);
+        }
+
+        this.pending.submit = false;
+      },
+      async deleteEvent() {
+        console.log("deleting event...");
+        const method = "DELETE";
+        const body = { id: this.id };
+        const payload = { method, body };
+
+        this.pending.delete = true;
+
+        try {
+          await this.sendData(payload);
+          this.onDeleteSuccess();
+          this.close();
+        } catch (error) {
+          this.onError(error);
+        }
+
+        this.pending.delete = false;
+        this.confirmDelete = false;
+      },
+
+      // Callbacks
+      onPostSuccess(response) {
+        this.$emit("events:add", response);
+      },
+      onPutSuccess(response) {
+        this.$emit("events:update", response);
+      },
+      onDeleteSuccess() {
+        this.$emit("events:delete");
+      },
+
+      // FRONTEND
+
+      // Utilities
+      formatDate(date) {
+        const [year, month, day] = date.split("-");
+        return `${day}.${month}.${year.substring(2)}`;
+      },
+
+      // Validators
+      validateTime(value, isStartType = true) {
+        if (this.selectedDates === 0) return true;
+
+        const [dateStart, dateEnd] = this.form.dateRange;
+        if (dateStart !== dateEnd) return true;
+
+        let isValid;
+
+        if (isStartType) {
+          isValid = value <= this.form.timeEnd;
+        } else {
+          isValid = value >= this.form.timeStart;
+        }
+
+        return isValid || this.rules.alerts.negativeTimeInterval;
+      },
+
+      hasNoChanges() {
+        return (
+          this.selectedDates === this.dateRange.length
+          && this.form.color === this.color
+          && this.form.name === this.name
+          && this.form.dateRange[0] === this.dateRange[0]
+          && this.form.dateRange[1] === this.dateRange[1]
+          && this.form.timeStart === this.timeStart
+          && this.form.timeEnd === this.timeEnd
+        );
+      },
+
+      // Getters
+      getFormWithNormalizedRanges() {
+        const dateRange = this.form.dateRange;
+        const timeStart = this.form.timeStart;
+        const timeEnd = this.form.timeEnd;
+
+        if (this.selectedDates === 1) {
+          dateRange.push(dateRange[0]);
+        }
+
+        dateRange.sort();
+        this.form.timeStart = timeStart ? timeStart : timeEnd ?? "00:00";
+        this.form.timeEnd = timeEnd ? timeEnd : timeStart ?? "23:59";
+
+        return this.form;
+      },
+
+      getPayloadBody() {
+        const form = this.getFormWithNormalizedRanges();
+        console.log("form is:");
+        console.log(form);
+
+        const payloadBody = {
+          color: form.color,
+          name: form.name,
+          start: [form.dateRange[0], form.timeStart].join(" "),
+          end: [form.dateRange[1], form.timeEnd].join(" "),
+        };
+
+        if (this.id) {
+          payloadBody.id = this.id;
+        }
+
+        return payloadBody;
+      },
+
+      // Handlers
+      applyPickerState(type) {
+        const ref = this.$refs[type];
+
+        if (Array.isArray(ref)) {
+          ref[0].save(this.form[type]);
+        } else {
+          ref.save(this.form[type]);
+        }
+      },
+
+      close() {
+        this.$emit("close");
+      },
     },
-  },
-
-  methods: {
-    // Vuex
-    addEvents(events) {
-      this.$store.commit('addEvents', events);
-    },
-    sendData(payload) {
-      return this.$store.dispatch('api/sendData', payload);
-    },
-    ...mapEventMutations([
-      'invalidateEvent',
-    ]),
-    ...mapEventActions([
-      'dismissEvent',
-      'updateEvent',
-      'deleteEvent',
-    ]),
-
-    // BACKEND
-
-    // Requests
-    submitRequest() {
-      console.log('submitting form...');
-      this.alerts = [];
-
-      if (!this.isNew && this.hasNoChanges()) {
-        const message = 'Для сохранения необходимо внести изменения.';
-        this.alerts.push({ text: { message } });
-        this.formIsValid = false;
-        return;
-      } else if (this.isInvalidEventSchedule(...this.normalizeRanges())) {
-        return;
-      }
-      const callbackType = this.isNew ? 'Post' : 'Put';
-      const successCallback = `on${callbackType}Success`;
-      const method = callbackType.toUpperCase();
-      const body = this.formPayload();
-      const payload = { method, body };
-
-      this.pending.submit = true;
-      this.sendData(payload)
-        .then(response => this[successCallback](response))
-        .finally(() => {
-          if (this.isNew) {
-            this.$emit('update:');
-          }
-          this.pending.submit = false;
-        })
-        .catch(error => this.rejectionCallback(error));
-    },
-    deleteRequest() {
-      console.log('deleting event...');
-      const method = 'DELETE';
-      const payload = { method };
-
-      this.pending.delete = true;
-      this.sendData(payload)
-        .then(response => this.onDeleteSuccess(response))
-        .finally(() => {
-          this.pending.delete = false;
-          this.deleteDialog = false;
-        })
-        .catch(error => this.rejectionCallback(error));
-    },
-
-    // Callbacks
-    async onPostSuccess(response) {
-      this.addEvents([ response ]);
-      this.dismissEvent('new');
-    },
-    async onPutSuccess(response) {
-      this.updateEvent(response);
-      this.dismissEvent({ type: 'existing' });
-    },
-    async onDeleteSuccess(response) {
-      this.deleteEvent(response);
-      this.dismissEvent('existing');
-    },
-
-    // FRONTEND
-
-    // Utilities
-    formatDate(date) {
-      const [ year, month, day ] = date.split('-');
-      return `${day}.${month}.${year.substring(2)}`;
-    },
-
-    normalizeRanges() {
-      if (this..dateRange.length === 1) {
-        this..dateRange.push(this..dateRange[0]);
-      }
-      const dateRangeSorted = this..dateRange.sort();
-      const startTime = this..timeStart ?? '00:00';
-      const endTime = this..timeEnd ?? '23:59';
-
-      return [ dateRangeSorted, [ startTime, endTime ] ];
-    },
-
-    formPayload() {
-      let payload = {
-        color: this..color,
-        name: this..name,
-        start: [
-          this..dateRange[0],
-          this..timeStart,
-        ].join(' '),
-        end: [
-          this..dateRange[1],
-          this..timeEnd,
-        ].join(' '),
-      };
-      if (!this.isNew) {
-        payload.id = this..id;
-      }
-      return payload;
-    },
-
-    // Validators
-    hasNoChanges() {
-      if (this..dateRange.length !== this.eventDateRange.length ||
-          this..color !== this.eventColor ||
-          this..name !== this.eventName ||
-          this..dateRange[0] !== this.eventDateRange[0] ||
-          this..dateRange[1] !== this.eventDateRange[1] ||
-          this..timeStart !== this.eventTime.start ||
-          this..timeEnd !== this.eventTime.end) {
-        return false;
-      }
-      return true;
-    },
-
-    isInvalidEventSchedule(dateRange, timeRange) {
-      let message;
-
-      if (dateRange[0] < this.today) {
-        message = 'Дата начала не может быть меньше текущей.';
-        this.alerts.push({ text: { message } });
-      }
-      if (dateRange[0] === dateRange[1] && timeRange[0] >= timeRange[1]) {
-        message = 'Время установлено некорректно.';
-        this.alerts.push({ text: { message } });
-      }
-      this.formIsValid = !this.alerts.length;
-      return !this.formIsValid;
-    },
-
-    // Handlers
-    applyPickerState(type) {
-      const ref = this.$refs[type];
-
-      if (Array.isArray(ref)) {
-        ref[0].save(this.[type]);
-      } else {
-        ref.save(this.[type]);
-      }
-    },
-
-    cancelFormEditing() {
-      const type = this.isNew ? 'new' : 'existing';
-      console.log('cancelling event type: ' + type);
-      this.dismissEvent(type);
-
-      if (type === 'new') {
-        this.$emit('update:current-event');
-      }
-    },
-  },
-};
+  };
 </script>
 
 <style scoped>

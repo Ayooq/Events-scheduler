@@ -34,7 +34,7 @@ const getters = {
 
 const actions = {
   // Utilities
-  async checkResponse(context, response) {
+  parseResponse(_, response) {
     console.log(response);
     if (!response.ok) {
       throw new Error(response.statusText);
@@ -47,11 +47,11 @@ const actions = {
     }
   },
 
-  async getToken(name) {
-    if (document.cookie && document.cookie !== "") {
+  getToken(_, name) {
+    if (document.cookie !== "") {
       const cookies = document.cookie.split(";");
       const token = cookies.find((cookie) => {
-        cookie.trim().substring(0, name.length + 1) === `${name}`;
+        return cookie.trim().substring(0, name.length + 1) === `${name}=`;
       });
 
       if (token) {
@@ -64,15 +64,16 @@ const actions = {
   },
 
   // Requests
-  async sendRequest({ dispatch }, request) {
-    dispatch("getToken", "csrftoken")
-      .then((token) => {
-        request.options.headers.append("X-CSRFToken", token);
-      })
-      .catch((error) => console.error(error));
+  async sendRequest({ dispatch }, { url, options }) {
+    try {
+      const token = dispatch("getToken", "csrftoken");
+      options.headers.append("X-CSRFToken", token);
+    } catch (error) {
+      console.error(error);
+    }
 
-    return fetch(request.url, request.options).then((response) => {
-      return dispatch("checkResponse", response);
+    return fetch(url, options).then((response) => {
+      return dispatch("parseResponse", response);
     });
   },
   async fetchData({ state, getters, dispatch }) {
@@ -83,15 +84,15 @@ const actions = {
 
     return dispatch("sendRequest", request);
   },
-  async sendData({ state, rootState, getters, dispatch }, payload) {
-    const endpoint = payload.method === "POST" ? "" : `${rootState.event.id}/`;
+  async sendData({ state, getters, dispatch }, { method, body }) {
+    const endpoint = method === "POST" ? "" : `${body.id}/`;
     const url = getters.eventsURL + endpoint;
     const options = { ...state.options };
+    options.method = method;
     options.headers.append("Content-Type", "application/json;charset=UTF-8");
-    options.method = payload.method;
 
-    if (payload.body) {
-      options.body = JSON.stringify(payload.body);
+    if (method !== "DELETE") {
+      options.body = JSON.stringify(body);
     }
 
     const request = { url, options };

@@ -1,83 +1,60 @@
-const state = {
+const state = () => ({
   id: null,
-  isValid: false,
   show: {
     new: false,
     existing: false,
   },
+  isValid: false,
   color: "secondary",
   name: null,
   dateRange: [],
-  time: {
-    start: null,
-    end: null,
-  },
-};
+  timeStart: null,
+  timeEnd: null,
+});
 
 const mutations = {
-  invalidateEvent(state, value) {
-    state.isValid = value;
-  },
-
-  changeEventVisibility(state, { type, value }) {
+  toggleEventVisibility(state, type) {
     console.log(`${type} state before: ${state.show[type]}`);
-    state.show[type] = value;
+    state.show[type] = !state.show[type];
     console.log(`${type} state after: ${state.show[type]}`);
   },
 
-  setEventID(state, value) {
-    state.id = value;
-  },
-  setEventColor(state, value) {
-    state.color = value;
-  },
-  setEventName(state, value) {
-    state.name = value;
-  },
-  setEventDateRange(state, range) {
-    state.dateRange = range;
-  },
-  setEventTimeStart(state, value) {
-    state.time.start = value;
-  },
-  setEventTimeEnd(state, value) {
-    state.time.end = value;
+  changeEventProperty(state, [key, value]) {
+    console.log(`${key} value before: ${value}`);
+    state[key] = value;
+    console.log(`${key} value after: ${value}`);
   },
 };
 
 const actions = {
   showEvent({ state, commit }, type) {
     if (state.isValid) {
-      commit("invalidateEvent", false);
+      commit("changeEventProperty", { key: "isValid", value: false });
     }
+
     setTimeout(() => {
-      commit("changeEventVisibility", { type, value: true });
+      commit("toggleEventVisibility", type);
     }, 10);
   },
-  dismissEvent({ commit }, type) {
-    commit("changeEventVisibility", { type, value: false });
+  dismissEvent({ state, commit }, type) {
+    if (state.show[type]) {
+      commit("toggleEventVisibility", type);
+    }
   },
 
-  async setEventData({ commit, dispatch }, event) {
-    commit("setEventID", event.id);
-    return dispatch("setEventCardData", event);
-  },
-  async setEventCardData({ commit }, event) {
-    commit("setEventColor", event.color);
-    commit("setEventName", event.name);
-    commit("setEventDateRange", event.dateRange);
-    commit("setEventTimeStart", event.time.start);
-    commit("setEventTimeEnd", event.time.end);
-    return event;
+  setEventData({ commit }, event) {
+    Object.entries(event).forEach((entry) => {
+      commit("changeEventProperty", entry);
+    });
   },
 
-  updateEvent({ dispatch, commit }, event) {
-    const index = dispatch("findEventIndex", event.id, { root: true });
-    const payload = {
+  updateEvent({ dispatch, commit }, eventData) {
+    const index = dispatch("findEventIndex", eventData.id, { root: true });
+    const event = {
       index,
-      data: event,
+      data: eventData,
     };
-    commit("updateEvents", [payload], { root: true });
+    commit("updateEvents", [event], { root: true });
   },
   deleteEvent({ dispatch, commit }, eventId) {
     const eventIndex = dispatch("findEventIndex", eventId, { root: true });

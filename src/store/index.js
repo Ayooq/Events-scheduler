@@ -12,25 +12,21 @@ const state = () => ({
 
 const mutations = {
   addEvents(state, events) {
-    events.forEach((e) => state.events.push(e));
+    events.forEach((event) => state.events.push(event));
   },
   updateEvents(state, events) {
     const updateEvent = state.events.splice;
-    events.forEach(({ index, data }) => {
-      updateEvent(index, 1, data);
-    });
+    events.forEach(({ index, data }) => updateEvent(index, 1, data));
   },
   deleteEvents(state, eventsIndeces) {
     const deleteEvent = state.events.splice;
-    eventsIndeces.forEach((index) => {
-      deleteEvent(index, 1);
-    });
+    eventsIndeces.forEach((index) => deleteEvent(index, 1));
   },
 };
 
 const actions = {
-  findEventIndex({ state }, eventId) {
-    return state.events.findIndex(({ id }) => id === eventId);
+  findEventIndex({ state }, eventID) {
+    return state.events.findIndex(({ id }) => id === eventID);
   },
 };
 
