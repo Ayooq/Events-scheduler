@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title v-if="id">
+    <v-card-title v-if="!id">
       <span v-once class="headline">Запланировать мероприятие</span>
     </v-card-title>
 
@@ -232,73 +232,75 @@
       },
     },
 
-    data: () => ({
-      today: new Date().toISOString().substring(0, 10),
-      form: {
-        isValid: false,
-        color: this.color,
-        name: this.name,
-        dateRange: this.dateRange,
-        timeStart: this.timeStart,
-        timeEnd: this.timeEnd,
-      },
-      confirmDelete: false,
-      pending: {
-        delete: false,
-        submit: false,
-      },
-      alerts: [],
-      colors: [
-        "blue",
-        "indigo",
-        "deep-purple",
-        "cyan",
-        "green",
-        "orange",
-        "red",
-        "grey darken-1",
-      ],
-      pickers: {
-        dateRange: {
-          colSizeSm: 11,
-          icon: "mdi-calendar",
-          label: "Дата",
-          hint: "Выберите диапазон",
-          show: false,
+    data() {
+      return {
+        today: new Date().toISOString().substring(0, 10),
+        form: {
+          isValid: false,
+          color: this.color,
+          name: this.name,
+          dateRange: this.dateRange,
+          timeStart: this.timeStart,
+          timeEnd: this.timeEnd,
         },
-        timeStart: {
-          colSizeSm: 5,
-          icon: "mdi-clock-outline",
-          label: "Время начала",
-          color: "primary",
-          show: false,
+        confirmDelete: false,
+        pending: {
+          delete: false,
+          submit: false,
         },
-        timeEnd: {
-          colSizeSm: 5,
-          icon: "mdi-clock",
-          label: "Время окончания",
-          color: "error",
-          show: false,
-        },
-      },
-      rules: {
-        alerts: {
-          requiredField: "Обязательное поле",
-          todayThreshold: "Дата начала не может быть меньше текущей",
-          negativeTimeInterval: "Время установлено некорректно",
-        },
-        name: [(value) => !!value || this.rules.alerts.requiredField],
-        dateRange: [
-          (range) => range.length > 0 || this.rules.alerts.requiredField,
-          (range) => {
-            const isValid = range.every((date) => date >= this.today);
-            return isValid || this.rules.alerts.todayThreshold;
-          },
+        alerts: [],
+        colors: [
+          "blue",
+          "indigo",
+          "deep-purple",
+          "cyan",
+          "green",
+          "orange",
+          "red",
+          "grey darken-1",
         ],
-        timeStart: [(value) => this.validateTime(value)],
-        timeEnd: [(value) => this.validateTime(value, false)],
-      },
-    }),
+        pickers: {
+          dateRange: {
+            colSizeSm: 11,
+            icon: "mdi-calendar",
+            label: "Дата",
+            hint: "Выберите диапазон",
+            show: false,
+          },
+          timeStart: {
+            colSizeSm: 5,
+            icon: "mdi-clock-outline",
+            label: "Время начала",
+            color: "primary",
+            show: false,
+          },
+          timeEnd: {
+            colSizeSm: 5,
+            icon: "mdi-clock",
+            label: "Время окончания",
+            color: "error",
+            show: false,
+          },
+        },
+        rules: {
+          alerts: {
+            requiredField: "Обязательное поле",
+            todayThreshold: "Дата начала не может быть меньше текущей",
+            negativeTimeInterval: "Время установлено некорректно",
+          },
+          name: [(value) => !!value || this.rules.alerts.requiredField],
+          dateRange: [
+            (range) => range.length > 0 || this.rules.alerts.requiredField,
+            (range) => {
+              const isValid = range.every((date) => date >= this.today);
+              return isValid || this.rules.alerts.todayThreshold;
+            },
+          ],
+          timeStart: [(value) => this.validateTime(value)],
+          timeEnd: [(value) => this.validateTime(value, false)],
+        },
+      };
+    },
 
     computed: {
       // Vuex
@@ -322,6 +324,17 @@
           .map((date) => this.formatDate(date))
           .join(" — ");
       },
+    },
+
+    mounted() {
+      this.$nextTick(() => {
+        console.log(this.$el);
+        console.log(this.$refs);
+        console.log(this.$parent);
+        console.log(this.$children);
+        console.log(this.$props);
+        console.log(this.$data);
+      });
     },
 
     methods: {
@@ -442,8 +455,8 @@
         }
 
         dateRange.sort();
-        this.form.timeStart = timeStart ? timeStart : timeEnd ?? "00:00";
-        this.form.timeEnd = timeEnd ? timeEnd : timeStart ?? "23:59";
+        this.form.timeStart = timeStart ? timeStart : timeEnd || "00:00";
+        this.form.timeEnd = timeEnd ? timeEnd : timeStart || "23:59";
 
         return this.form;
       },

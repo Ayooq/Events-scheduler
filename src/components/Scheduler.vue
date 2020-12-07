@@ -155,57 +155,59 @@
       ErrorAlertsList,
     },
 
-    data: () => ({
-      // pre-load
-      pending: false,
-      skeletonTypes: {
-        "table-tbody": "table-row-divider@8",
-        "table-row": "table-cell@7",
-      },
-      alerts: [],
-
-      // header
-      focus: "",
-      rendering: {
-        modes: [
-          {
-            text: "Включить",
-            value: "stack",
-          },
-          {
-            text: "Выключить",
-            value: "column",
-          },
-        ],
-        currentMode: "stack",
-        types: {
-          month: "Месяц",
-          week: "Неделя",
-          day: "День",
+    data() {
+      return {
+        // pre-load
+        pending: false,
+        skeletonTypes: {
+          "table-tbody": "table-row-divider@8",
+          "table-row": "table-cell@7",
         },
-        currentType: {
-          id: 0,
-          value: "month",
+        alerts: [],
+
+        // header
+        focus: "",
+        rendering: {
+          modes: [
+            {
+              text: "Включить",
+              value: "stack",
+            },
+            {
+              text: "Выключить",
+              value: "column",
+            },
+          ],
+          currentMode: "stack",
+          types: {
+            month: "Месяц",
+            week: "Неделя",
+            day: "День",
+          },
+          currentType: {
+            id: 0,
+            value: "month",
+          },
         },
-      },
 
-      // body
-      weekdaysOrder: [1, 2, 3, 4, 5, 6, 0],
-      defaultEvent: Object.freeze({
-        name: null,
-        dateRange: [],
-        timeStart: null,
-        timeEnd: null,
-      }),
-      currentEvent: {},
-      selectedElement: null,
+        // body
+        weekdaysOrder: [1, 2, 3, 4, 5, 6, 0],
+        defaultEvent: Object.freeze({
+          name: "",
+          dateRange: [],
+          timeStart: "",
+          timeEnd: "",
+        }),
+        currentEvent: {},
+        selectedElement: null,
 
-      // detached
-      eventCardOpened: {
-        new: false,
-        existing: false,
-      },
-    }),
+        // detached
+        eventCardOpened: {
+          new: false,
+          existing: false,
+        },
+      };
+    },
 
     computed: {
       // Vuex
@@ -230,6 +232,7 @@
         };
         this.alerts = [alert];
       });
+      console.log(this.defaultEvent);
       // this.authenticateUser(userCredentials);
       this.getEvents();
     },
@@ -326,6 +329,7 @@
         this.eventCardOpened[type] = !this.eventCardOpened[type];
       },
       showNewEventCard() {
+        console.log("showing new event...");
         const existing = "existing";
 
         if (this.eventCardOpened[existing]) {
@@ -333,6 +337,8 @@
         }
 
         this.currentEvent = { ...this.defaultEvent };
+        console.log("new event:");
+        console.log(this.currentEvent);
         this.toggleEventVisibility("new");
       },
       showExistingEventCard({ event, nativeEvent }) {
