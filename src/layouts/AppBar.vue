@@ -1,6 +1,6 @@
 <template>
   <v-app-bar color="primary" app dark dense>
-    <router-link to="/">
+    <v-btn to="/" color="primary" outlined>
       <v-img
         alt="Vuetify Logo"
         class="mr-2 shrink"
@@ -9,11 +9,10 @@
         width="40"
         contain
       />
-
-      <v-toolbar-title class="font-weight-bold text-uppercase">
+      <span class="white--text text-h6">
         {{ title }}
-      </v-toolbar-title>
-    </router-link>
+      </span>
+    </v-btn>
 
     <v-spacer />
 
