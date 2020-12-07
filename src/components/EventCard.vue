@@ -1,23 +1,42 @@
 <template>
   <v-card>
     <v-card-title v-if="!id">
-      <span v-once class="headline">Запланировать мероприятие</span>
+      <span
+        v-once
+        class="headline"
+      >
+        Запланировать мероприятие
+      </span>
     </v-card-title>
 
-    <v-toolbar v-else dark :color="form.color">
+    <v-toolbar
+      v-else
+      dark
+      :color="form.color"
+    >
       <v-toolbar-title v-once>{{ name }}</v-toolbar-title>
 
       <v-spacer />
 
-      <v-dialog v-model="confirmDelete" width="350">
+      <v-dialog
+        v-model="confirmDelete"
+        width="350"
+      >
         <template #activator="{ on, attrs }">
-          <v-btn icon v-bind="attrs" v-on="on">
+          <v-btn
+            icon
+            v-bind="attrs"
+            v-on="on"
+          >
             <v-icon v-once>mdi-delete</v-icon>
           </v-btn>
         </template>
 
         <v-card>
-          <v-card-title v-once class="error white--text">
+          <v-card-title
+            v-once
+            class="error white--text"
+          >
             Удалить мероприятие?
           </v-card-title>
 
@@ -32,11 +51,25 @@
               :loading="pending.delete"
               @click="deleteEvent"
             >
-              <v-icon v-once left>mdi-delete-forever-outline</v-icon>
+              <v-icon
+                v-once
+                left
+              >
+                mdi-delete-forever-outline
+              </v-icon>
               <span v-once>Да</span>
             </v-btn>
-            <v-btn color="info" text @click="confirmDelete = false">
-              <v-icon v-once left>mdi-delete-restore</v-icon>
+            <v-btn
+              color="info"
+              text
+              @click="confirmDelete = false"
+            >
+              <v-icon
+                v-once
+                left
+              >
+                mdi-delete-restore
+              </v-icon>
               <span v-once>Нет</span>
             </v-btn>
           </v-card-actions>
@@ -50,7 +83,10 @@
 
         <v-form v-model="form.isValid">
           <v-row justify="space-around">
-            <v-col cols="12" sm="11">
+            <v-col
+              cols="12"
+              sm="11"
+            >
               <v-text-field
                 v-model.lazy.trim="form.name"
                 label="Название"
@@ -95,10 +131,11 @@
                     v-on="on"
                   >
                     <template #append>
-                      <v-tooltip open-delay="10" top>
-                        <template
-                          #activator="{ on: listeners, attrs: tooltipAttrs }"
-                        >
+                      <v-tooltip
+                        open-delay="10"
+                        top
+                      >
+                        <template #activator="{ on: listeners, attrs: tooltipAttrs }">
                           <v-icon
                             v-bind="{ ...tooltipAttrs }"
                             v-on="{ ...listeners }"
@@ -139,10 +176,18 @@
                 >
                   <v-spacer />
 
-                  <v-btn color="info" text @click="applyPickerState(type)">
+                  <v-btn
+                    color="info"
+                    text
+                    @click="applyPickerState(type)"
+                  >
                     OK
                   </v-btn>
-                  <v-btn color="error" text @click="picker.show = false">
+                  <v-btn
+                    color="error"
+                    text
+                    @click="picker.show = false"
+                  >
                     Отмена
                   </v-btn>
                 </v-date-picker>
@@ -157,10 +202,18 @@
                 >
                   <v-spacer />
 
-                  <v-btn color="info" text @click="applyPickerState(type)">
+                  <v-btn
+                    color="info"
+                    text
+                    @click="applyPickerState(type)"
+                  >
                     OK
                   </v-btn>
-                  <v-btn color="error" text @click="picker.show = false">
+                  <v-btn
+                    color="error"
+                    text
+                    @click="picker.show = false"
+                  >
                     Отмена
                   </v-btn>
                 </v-time-picker>
@@ -183,7 +236,11 @@
       >
         OK
       </v-btn>
-      <v-btn color="error" text @click="close">Отмена</v-btn>
+      <v-btn
+        color="error"
+        text
+        @click="close"
+      >Отмена</v-btn>
     </v-card-actions>
   </v-card>
 </template>
