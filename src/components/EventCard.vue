@@ -383,17 +383,6 @@
       },
     },
 
-    mounted() {
-      this.$nextTick(() => {
-        console.log(this.$el);
-        console.log(this.$refs);
-        console.log(this.$parent);
-        console.log(this.$children);
-        console.log(this.$props);
-        console.log(this.$data);
-      });
-    },
-
     methods: {
       // Vuex
       sendData(payload) {
