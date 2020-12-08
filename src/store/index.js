@@ -2,7 +2,6 @@ import Vue from "vue";
 import Vuex from "vuex";
 
 import api from "./modules/api";
-import event from "./modules/event";
 
 Vue.use(Vuex);
 
@@ -37,6 +36,5 @@ export default new Vuex.Store({
   actions,
   modules: {
     api,
-    event,
   },
 });

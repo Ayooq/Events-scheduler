@@ -17,6 +17,8 @@ module.exports = {
     sourceType: "module",
   },
   rules: {
+    "arrow-parens": ["error", "always"],
+    "comma-dangle": ["error", "always-multiline"],
     "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
     "no-confusing-arrow": "error",
