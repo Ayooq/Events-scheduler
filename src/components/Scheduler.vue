@@ -142,231 +142,231 @@
 </template>
 
 <script>
-  import { mapMutations } from "vuex";
+import { mapMutations } from "vuex";
 
-  import EventCard from "./EventCard.vue";
-  import ErrorAlertsList from "./ErrorAlertsList.vue";
+import EventCard from "./EventCard.vue";
+import ErrorAlertsList from "./ErrorAlertsList.vue";
 
-  export default {
-    name: "Scheduler",
+export default {
+  name: "Scheduler",
 
-    components: {
-      EventCard,
-      ErrorAlertsList,
+  components: {
+    EventCard,
+    ErrorAlertsList,
+  },
+
+  data() {
+    return {
+      // pre-load
+      pending: false,
+      skeletonTypes: {
+        "table-tbody": "table-row-divider@8",
+        "table-row": "table-cell@7",
+      },
+      alerts: [],
+
+      // header
+      focus: "",
+      rendering: {
+        modes: [
+          {
+            text: "Включить",
+            value: "stack",
+          },
+          {
+            text: "Выключить",
+            value: "column",
+          },
+        ],
+        currentMode: "stack",
+        types: {
+          month: "Месяц",
+          week: "Неделя",
+          day: "День",
+        },
+        currentType: {
+          id: 0,
+          value: "month",
+        },
+      },
+
+      // body
+      weekdaysOrder: [1, 2, 3, 4, 5, 6, 0],
+      defaultEvent: Object.freeze({
+        name: "",
+        dateRange: [],
+        timeStart: "",
+        timeEnd: "",
+      }),
+      currentEvent: {},
+      selectedElement: null,
+
+      // detached
+      eventCardOpened: {
+        new: false,
+        existing: false,
+      },
+    };
+  },
+
+  computed: {
+    // Vuex
+    events() {
+      return this.$store.state.events;
+    },
+  },
+
+  created() {
+    window.addEventListener("unhandledrejection", () => {
+      const url = "https://help.example.com";
+      const line1 = "Ошибка в приложении. Попробуйте перезагрузить страницу.";
+      const line2 = "В случае повторной ошибки, пожалуйста, обратитесь в";
+      const message = `${[line1, line2].join("\n")} `;
+      const clickableText = "службу поддержки";
+      const alert = {
+        url,
+        text: {
+          message,
+          clickableText,
+        },
+      };
+      this.alerts = [alert];
+    });
+    console.log(this.defaultEvent);
+    // this.authenticateUser(userCredentials);
+    this.getEvents();
+  },
+
+  methods: {
+    // Vuex
+    ...mapMutations(["addEvents", "updateEvents", "deleteEvents"]),
+
+    findEventIndex(id) {
+      return this.$store.dispatch("findEventIndex", id);
     },
 
-    data() {
+    fetchData() {
+      return this.$store.dispatch("api/fetchData");
+    },
+
+    // BACKEND
+
+    // Requests
+    async authenticateUser(userCredentials) {
+      console.log(userCredentials);
+      // await this.sendRequest(this.authEndpoint);
+    },
+
+    getEvents() {
+      this.pending = true;
+      this.fetchData()
+        .then((response) => this.onResponseSuccess(response))
+        .finally(() => {
+          this.pending = false;
+        })
+        .catch((error) => this.onError(error));
+    },
+
+    // Callbacks
+    onResponseSuccess(response) {
+      if (this.alerts.length > 0) {
+        this.alerts = [];
+      }
+
+      this.addEvents(response);
+    },
+    onError(error) {
+      const message = "Ошибка на стороне сервера. Попробуйте позже.";
+      this.alerts.push({ text: { message } });
+      console.error(error);
+    },
+
+    // FRONTEND
+
+    // Getters
+    getEventColor({ color }) {
+      return color || "secondary";
+    },
+
+    getFormattedEventData({ id, color, name, start, end }) {
+      const [dateStart, timeStart] = start.trim().split(" ");
+      const [dateEnd, timeEnd] = end.trim().split(" ");
       return {
-        // pre-load
-        pending: false,
-        skeletonTypes: {
-          "table-tbody": "table-row-divider@8",
-          "table-row": "table-cell@7",
-        },
-        alerts: [],
-
-        // header
-        focus: "",
-        rendering: {
-          modes: [
-            {
-              text: "Включить",
-              value: "stack",
-            },
-            {
-              text: "Выключить",
-              value: "column",
-            },
-          ],
-          currentMode: "stack",
-          types: {
-            month: "Месяц",
-            week: "Неделя",
-            day: "День",
-          },
-          currentType: {
-            id: 0,
-            value: "month",
-          },
-        },
-
-        // body
-        weekdaysOrder: [1, 2, 3, 4, 5, 6, 0],
-        defaultEvent: Object.freeze({
-          name: "",
-          dateRange: [],
-          timeStart: "",
-          timeEnd: "",
-        }),
-        currentEvent: {},
-        selectedElement: null,
-
-        // detached
-        eventCardOpened: {
-          new: false,
-          existing: false,
-        },
+        id,
+        color,
+        name,
+        dateRange: [dateStart, dateEnd],
+        timeStart,
+        timeEnd,
       };
     },
 
-    computed: {
-      // Vuex
-      events() {
-        return this.$store.state.events;
-      },
+    // Setters
+    setCalendarType(index, key) {
+      this.rendering.currentType = {
+        id: index,
+        value: key,
+      };
     },
 
-    created() {
-      window.addEventListener("unhandledrejection", () => {
-        const url = "https://help.example.com";
-        const line1 = "Ошибка в приложении. Попробуйте перезагрузить страницу.";
-        const line2 = "В случае повторной ошибки, пожалуйста, обратитесь в";
-        const message = `${[line1, line2].join("\n")} `;
-        const clickableText = "службу поддержки";
-        const alert = {
-          url,
-          text: {
-            message,
-            clickableText,
-          },
-        };
-        this.alerts = [alert];
-      });
-      console.log(this.defaultEvent);
-      // this.authenticateUser(userCredentials);
-      this.getEvents();
+    setFocusOnDate({ date }) {
+      this.focus = date;
+      this.rendering.currentType = {
+        id: 2,
+        value: "day",
+      };
     },
 
-    methods: {
-      // Vuex
-      ...mapMutations(["addEvents", "updateEvents", "deleteEvents"]),
-
-      findEventIndex(id) {
-        return this.$store.dispatch("findEventIndex", id);
-      },
-
-      fetchData() {
-        return this.$store.dispatch("api/fetchData");
-      },
-
-      // BACKEND
-
-      // Requests
-      async authenticateUser(userCredentials) {
-        console.log(userCredentials);
-        // await this.sendRequest(this.authEndpoint);
-      },
-
-      getEvents() {
-        this.pending = true;
-        this.fetchData()
-          .then((response) => this.onResponseSuccess(response))
-          .finally(() => {
-            this.pending = false;
-          })
-          .catch((error) => this.onError(error));
-      },
-
-      // Callbacks
-      onResponseSuccess(response) {
-        if (this.alerts.length > 0) {
-          this.alerts = [];
-        }
-
-        this.addEvents(response);
-      },
-      onError(error) {
-        const message = "Ошибка на стороне сервера. Попробуйте позже.";
-        this.alerts.push({ text: { message } });
-        console.error(error);
-      },
-
-      // FRONTEND
-
-      // Getters
-      getEventColor({ color }) {
-        return color || "secondary";
-      },
-
-      getFormattedEventData({ id, color, name, start, end }) {
-        const [dateStart, timeStart] = start.trim().split(" ");
-        const [dateEnd, timeEnd] = end.trim().split(" ");
-        return {
-          id,
-          color,
-          name,
-          dateRange: [dateStart, dateEnd],
-          timeStart,
-          timeEnd,
-        };
-      },
-
-      // Setters
-      setCalendarType(index, key) {
-        this.rendering.currentType = {
-          id: index,
-          value: key,
-        };
-      },
-
-      setFocusOnDate({ date }) {
-        this.focus = date;
-        this.rendering.currentType = {
-          id: 2,
-          value: "day",
-        };
-      },
-
-      // Handlers
-      prev() {
-        this.$refs.calendar.prev();
-      },
-      next() {
-        this.$refs.calendar.next();
-      },
-
-      toggleEventVisibility(type) {
-        this.eventCardOpened[type] = !this.eventCardOpened[type];
-      },
-      showNewEventCard() {
-        console.log("showing new event...");
-        const existing = "existing";
-
-        if (this.eventCardOpened[existing]) {
-          this.toggleEventVisibility(existing);
-        }
-
-        this.currentEvent = { ...this.defaultEvent };
-        console.log("new event:");
-        console.log(this.currentEvent);
-        this.toggleEventVisibility("new");
-      },
-      showExistingEventCard({ event, nativeEvent }) {
-        const existing = "existing";
-        setTimeout(() => {
-          this.toggleEventVisibility(existing);
-        }, 10);
-
-        if (this.eventCardOpened[existing]) {
-          this.toggleEventVisibility(existing);
-        }
-
-        this.currentEvent = this.getFormattedEventData(event);
-        this.selectedElement = nativeEvent.target;
-      },
-
-      addNewEvent(event) {
-        this.addEvents([event]);
-      },
-      updateExistingEvent(data) {
-        const index = this.findEventIndex(this.currentEvent.id);
-        const event = { index, data };
-        this.updateEvents([event]);
-      },
-      deleteExistingEvent() {
-        const eventIndex = this.findEventIndex(this.currentEvent.id);
-        this.deleteEvents([eventIndex]);
-      },
+    // Handlers
+    prev() {
+      this.$refs.calendar.prev();
     },
-  };
+    next() {
+      this.$refs.calendar.next();
+    },
+
+    toggleEventVisibility(type) {
+      this.eventCardOpened[type] = !this.eventCardOpened[type];
+    },
+    showNewEventCard() {
+      console.log("showing new event...");
+      const existing = "existing";
+
+      if (this.eventCardOpened[existing]) {
+        this.toggleEventVisibility(existing);
+      }
+
+      this.currentEvent = { ...this.defaultEvent };
+      console.log("new event:");
+      console.log(this.currentEvent);
+      this.toggleEventVisibility("new");
+    },
+    showExistingEventCard({ event, nativeEvent }) {
+      const existing = "existing";
+      setTimeout(() => {
+        this.toggleEventVisibility(existing);
+      }, 10);
+
+      if (this.eventCardOpened[existing]) {
+        this.toggleEventVisibility(existing);
+      }
+
+      this.currentEvent = this.getFormattedEventData(event);
+      this.selectedElement = nativeEvent.target;
+    },
+
+    addNewEvent(event) {
+      this.addEvents([event]);
+    },
+    updateExistingEvent(data) {
+      const index = this.findEventIndex(this.currentEvent.id);
+      const event = { index, data };
+      this.updateEvents([event]);
+    },
+    deleteExistingEvent() {
+      const eventIndex = this.findEventIndex(this.currentEvent.id);
+      this.deleteEvents([eventIndex]);
+    },
+  },
+};
 </script>

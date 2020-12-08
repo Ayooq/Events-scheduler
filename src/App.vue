@@ -8,13 +8,13 @@
 </template>
 
 <script>
-  import AppBar from "./layouts/AppBar.vue";
+import AppBar from "./layouts/AppBar.vue";
 
-  export default {
-    name: "App",
+export default {
+  name: "App",
 
-    components: {
-      AppBar,
-    },
-  };
+  components: {
+    AppBar,
+  },
+};
 </script>

@@ -22,7 +22,6 @@ module.exports = {
     "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
     "no-confusing-arrow": "error",
-    "no-extra-parens": ["error", "functions"],
     "no-mixed-operators": "error",
     "operator-linebreak": ["error", "before"],
   },

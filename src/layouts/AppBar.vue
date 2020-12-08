@@ -24,18 +24,18 @@
 </template>
 
 <script>
-  export default {
-    name: "AppBar",
-    data: () => ({
-      title: "Планировщик мероприятий",
-    }),
-    methods: {
-      login() {
-        console.log("attempting login...");
-        setTimeout(() => {
-          console.log("OK!");
-        }, 1000);
-      },
+export default {
+  name: "AppBar",
+  data: () => ({
+    title: "Планировщик мероприятий",
+  }),
+  methods: {
+    login() {
+      console.log("attempting login...");
+      setTimeout(() => {
+        console.log("OK!");
+      }, 1000);
     },
-  };
+  },
+};
 </script>

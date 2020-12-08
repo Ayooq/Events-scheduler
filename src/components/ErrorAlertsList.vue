@@ -9,10 +9,7 @@
     :value="!!alerts.length"
   >
     <v-list>
-      <v-list-item
-        v-for="(alert, index) of alerts"
-        :key="index"
-      >
+      <v-list-item v-for="(alert, index) of alerts" :key="index">
         <span>
           {{ alert.text.message }}
           <a
@@ -22,11 +19,7 @@
             :href="alert.url"
           >
             {{ alert.text.clickableText }}
-            <v-icon
-              v-once
-              class="primary--text"
-              small
-            >
+            <v-icon v-once class="primary--text" small>
               mdi-open-in-new
             </v-icon>
           </a>
@@ -38,7 +31,7 @@
 
 <script>
 export default {
-  name: 'ErrorAlertsList',
+  name: "ErrorAlertsList",
 
   props: {
     alerts: {

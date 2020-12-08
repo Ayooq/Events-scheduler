@@ -135,10 +135,10 @@
                         open-delay="10"
                         top
                       >
-                        <template #activator="{ on: listeners, attrs: tooltipAttrs }">
+                        <template #activator="{ on: tipOn, attrs: tipAttrs }">
                           <v-icon
-                            v-bind="{ ...tooltipAttrs }"
-                            v-on="{ ...listeners }"
+                            v-bind="{ ...tipAttrs }"
+                            v-on="{ ...tipOn }"
                           >
                             mdi-help-circle-outline
                           </v-icon>
@@ -349,7 +349,7 @@
           dateRange: [
             (range) => range.length > 0 || this.rules.alerts.requiredField,
             (range) => {
-              const isValid = range.every((date) => date >= this.today);
+              const isValid = range.every((date) => (date >= this.today));
               return isValid || this.rules.alerts.todayThreshold;
             },
           ],
