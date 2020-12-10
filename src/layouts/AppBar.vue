@@ -9,7 +9,7 @@
         width="40"
         contain
       />
-      <span class="white--text text-h6">
+      <span class="d-none d-sm-inline text-h6 white--text">
         {{ title }}
       </span>
     </v-btn>
@@ -17,17 +17,20 @@
     <v-spacer />
 
     <v-btn text @click="login">
-      <span v-once class="mr-2">Войти</span>
-      <v-icon v-once>mdi-calendar-account-outline</v-icon>
+      <span v-once>Войти</span>
+      <v-icon v-once right>{{ accountIcon }}</v-icon>
     </v-btn>
   </v-app-bar>
 </template>
 
 <script>
+import { mdiCalendarAccountOutline } from "@mdi/js";
+
 export default {
   name: "AppBar",
   data: () => ({
     title: "Планировщик мероприятий",
+    accountIcon: mdiCalendarAccountOutline,
   }),
   methods: {
     login() {

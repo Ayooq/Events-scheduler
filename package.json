@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "fix": "prettier-eslint --write $PWD/'src/**/*.{js,vue}'"
+    "fix": "prettier-eslint --write $PWD/'**/*.{js,vue}'"
   },
   "dependencies": {
     "core-js": "^3.6.5",
@@ -29,6 +29,7 @@
     "prettier": "^2.2.1",
     "prettier-eslint": "^12.0.0",
     "prettier-eslint-cli": "^5.0.0",
+    "sass": "^1.30.0",
     "sass-loader": "^10.1.0",
     "vue-cli-plugin-vuetify": "~2.0.7",
     "vue-template-compiler": "^2.6.11",
